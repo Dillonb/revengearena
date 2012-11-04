@@ -109,10 +109,10 @@ public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 	new victim = GetClientOfUserId(victim_id)
 	new killer = GetClientOfUserId(attacker_id)
 	
-	decl String:victimName[33]
+	//decl String:victimName[33]
 	decl String:killerName[33]
 	
-	GetClientName(victim, victimName, 33)
+	//GetClientName(victim, victimName, 33)
 	GetClientName(killer, killerName, 33)
 	
 	if (victim == killer || killer == 0)
@@ -123,7 +123,7 @@ public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 		return //Committing suicide will NOT make you revive
 	}
 	PrintCenterText(victim, "You were killed by %s", killerName)
-	PrintCenterText(killer, "You killed %s.", victimName)
+	//PrintCenterText(killer, "You killed %s.", victimName)
 	RespawnAllByKiller(victim) //Respawn all players killed by the victim
 	killedby[victim] = killer
 }
