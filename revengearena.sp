@@ -23,11 +23,9 @@ public OnPluginStart()
 
 	decl String:GameType[50]
 	GetGameFolderName(GameType, sizeof(GameType))
-	PrintToChatAll("This is %s", GameType)
 	
 	if (StrEqual(GameType, "tf", false))
 	{
-		PrintToChatAll("Setting gametype to 1")
 		gametype = 1
 	}
 	
@@ -35,6 +33,8 @@ public OnPluginStart()
 	ResetKilledbyList()
 	
 	HookEvent("player_death", Event_PlayerDeath)
+	
+	//For maximum compatibility.
 	HookEvent("arena_round_start", Event_RoundStart)
 	HookEvent("teamplay_round_start", Event_RoundStart)
 	HookEvent("game_init", Event_RoundStart)
@@ -49,15 +49,15 @@ public Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
 
 public Event_PlayerDisconnect(Handle:event, const String:name[], bool:dontBroadcast)
 {
+	//Treat disconnects like the player was killed.
 	new userid = GetEventInt(event, "userid")
 	new player = GetClientOfUserId(userid)
 	RespawnAllByKiller(player)
 
 }
-
+//Refresh the entire killedby array to fix issues between games.
 ResetKilledbyList()
 {
-	PrintToChatAll("Refreshing killedby list.")
 	for (new i = 0; i <= MAXPLAYERS; i++)
 	{
 		killedby[i] = -1
@@ -67,31 +67,32 @@ ResetKilledbyList()
 //Respawns all players killed by id
 RespawnAllByKiller(id)
 {
-	PrintToChatAll("Respawning everyone killed by %d", id)
+	decl String:killerName[33]	
+	GetClientName(id, killerName, 33)
 	for (new i = 0; i < MAXPLAYERS; i++)
 	{
 		if (killedby[i] == id)
 		{
-			PrintToChatAll("%d was killed by %d. Respawning %d.",i,id,i)
+			decl String:playerName[33]
+			GetClientName(i, playerName, 33)
+			PrintToChatAll("%s is back in the game!", playerName)
+			PrintCenterText(i, "With %s's death, you are back in the game!", killerName)
 			killedby[i] = -1
 			RespawnPlayer(i)
 		}
 	}
 }
+
+//Game-agnostic respawn method
 RespawnPlayer(id)
 {
 	if (gametype == 1)
 	{
-		PrintToChatAll("TF2_RespawnPlayer()")
 		TF2_RespawnPlayer(id)
-	}
-	else
-	{
-		PrintToChatAll("Unknown mod. Can't respawn.")
 	}
 }
 
-
+//Process a player's death - respawn all they have killed
 public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	//Handle dead ringer in TF2
@@ -107,7 +108,12 @@ public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 	new attacker_id = GetEventInt(event, "attacker")   
 	new victim = GetClientOfUserId(victim_id)
 	new killer = GetClientOfUserId(attacker_id)
-
+	
+	decl String:victimName[33]
+	decl String:killerName[33]
+	
+	GetClientName(victim, victimName, 33)
+	GetClientName(killer, killerName, 33)
 	
 	if (victim == killer || killer == 0)
 	{
@@ -116,10 +122,8 @@ public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 		PrintCenterText(victim, "Suicide is never the answer.")
 		return //Committing suicide will NOT make you revive
 	}
-	PrintCenterText(victim, "You were killed by %d", killer)
-	PrintCenterText(killer, "You killed player with id %d", victim)
+	PrintCenterText(victim, "You were killed by %s", killerName)
+	PrintCenterText(killer, "You killed %s.", victimName)
 	RespawnAllByKiller(victim) //Respawn all players killed by the victim
 	killedby[victim] = killer
-	PrintToChatAll("%d killed %d", killer, victim)
-   /* CODE */
 }
