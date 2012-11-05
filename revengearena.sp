@@ -16,7 +16,7 @@ new Handle:revengearena_enabled = INVALID_HANDLE
 //Game:
 // 0 : unknown
 // 1 : Team Fortress 2
-// 2 : Counter-Strike Source
+// 2 : Counter-Strike Source (Not implemented yet)
 new gametype = 0
 public OnPluginStart()
 {
@@ -29,17 +29,27 @@ public OnPluginStart()
 		gametype = 1
 	}
 	
+	// 0 - disabled
+	// 1 - enabled on supported maps
+	// 2 - forced enabled on all maps
 	revengearena_enabled = CreateConVar("revengearena_enabled", "0")
 	ResetKilledbyList()
 	
 	HookEvent("player_death", Event_PlayerDeath)
 	
-	//For maximum compatibility.
+	//For maximum compatibility, hook everything
 	HookEvent("arena_round_start", Event_RoundStart)
 	HookEvent("teamplay_round_start", Event_RoundStart)
 	HookEvent("game_init", Event_RoundStart)
 	HookEvent("game_start", Event_RoundStart)
 	HookEvent("round_start", Event_RoundStart)
+}
+
+//Checks whether revengearena should be enabled.
+//Takes into account the map type and the setting of revengearena_enabled.
+bool:IsRevengeArenaEnabled()
+{
+	return true
 }
 
 public Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
