@@ -1,5 +1,9 @@
 #include <sourcemod>
+
+#undef REQUIRE_EXTENSIONS
+#include <cstrike>
 #include <tf2>
+#define REQUIRE_EXTENSIONS
 
 public Plugin:myinfo =
 {
@@ -16,11 +20,11 @@ new Handle:revengearena_enabled = INVALID_HANDLE
 //Game:
 // 0 : unknown
 // 1 : Team Fortress 2
-// 2 : Counter-Strike Source (Not implemented yet)
+// 2 : Counter-Strike Source
+// 3 : Counter-Strike Global Offensive
 new gametype = 0
 public OnPluginStart()
 {
-
     decl String:GameType[50]
     GetGameFolderName(GameType, sizeof(GameType))
     
@@ -28,6 +32,15 @@ public OnPluginStart()
     {
         gametype = 1
     }
+    if(StrEqual(GameType, "cstrike"))
+    {
+        gametype = 2
+    }
+    if (StrEqual(GameType, "csgo"))
+    {
+        gametype = 3
+    }
+
     
     // 0 - disabled
     // 1 - enabled on supported maps
@@ -38,7 +51,10 @@ public OnPluginStart()
     HookEvent("player_death", Event_PlayerDeath)
     
     //For maximum compatibility, hook everything
-    HookEvent("arena_round_start", Event_RoundStart)
+    if (StrEqual(GameType, "tf"))
+    {
+        HookEvent("arena_round_start", Event_RoundStart)
+    }
     HookEvent("teamplay_round_start", Event_RoundStart)
     HookEvent("game_init", Event_RoundStart)
     HookEvent("game_start", Event_RoundStart)
@@ -99,6 +115,14 @@ RespawnPlayer(id)
     if (gametype == 1)
     {
         TF2_RespawnPlayer(id)
+    }
+    if (gametype == 2)
+    {
+        CS_RespawnPlayer(id)
+    }
+    if (gametype == 3)
+    {
+        CS_RespawnPlayer(id)
     }
 }
 
