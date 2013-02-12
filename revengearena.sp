@@ -23,6 +23,7 @@ new Handle:revengearena_enabled = INVALID_HANDLE
 // 2 : Counter-Strike Source
 // 3 : Counter-Strike Global Offensive
 new gametype = 0
+new bool:supportedMap = false
 public OnPluginStart()
 {
     decl String:GameType[50]
@@ -65,16 +66,46 @@ public OnPluginStart()
 //Takes into account the map type and the setting of revengearena_enabled.
 bool:IsRevengeArenaEnabled()
 {
-    return true
+    if (supportedMap && revengearena_enabled)
+    {
+        return true
+    }
+    return false
 }
+public refreshMapSupportedStatus()
+{
+    if (gametype == 2 || gametype == 3)
+    {
+        supportedMap = true
+    }
+    if (gametype == 1)
+    {
+        decl String:MapName[6]
+        GetCurrentMap(MapName, sizeof(MapName))
+        if (StrEqual(MapName, "arena_", false))
+        {
+            supportedMap = true
+        }
 
+    }
+
+}
 public Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
 {
+    if (!IsRevengeArenaEnabled())
+    {
+        return
+    }
+    refreshMapSupportedStatus()
     ResetKilledbyList()
 }
 
 public Event_PlayerDisconnect(Handle:event, const String:name[], bool:dontBroadcast)
 {
+    if (!IsRevengeArenaEnabled())
+    {
+        return
+    }
     //Treat disconnects like the player was killed.
     new userid = GetEventInt(event, "userid")
     new player = GetClientOfUserId(userid)
@@ -112,6 +143,10 @@ RespawnAllByKiller(id)
 //Game-agnostic respawn method
 RespawnPlayer(id)
 {
+    if (!IsRevengeArenaEnabled())
+    {
+        return
+    }
     if (gametype == 1)
     {
         TF2_RespawnPlayer(id)
@@ -129,6 +164,10 @@ RespawnPlayer(id)
 //Process a player's death - respawn all they have killed
 public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 {
+    if (!IsRevengeArenaEnabled())
+    {
+        return
+    }
     //Handle dead ringer in TF2
     if (gametype == 1)
     {
