@@ -193,7 +193,7 @@ public Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
         killedby[victim] = -1;
         RespawnAllByKiller(victim);
         PrintCenterText(victim, "Suicide is never the answer.");
-        return //Committing suicide will NOT make you revive
+        return; //Committing suicide will NOT make you revive
     }
     PrintCenterText(victim, "You were killed by %s", killerName);
     //PrintCenterText(killer, "You killed %s.", victimName)
